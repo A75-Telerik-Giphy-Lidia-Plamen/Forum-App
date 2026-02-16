@@ -1,33 +1,32 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import { schema } from "../../schemas/auth.schema";
-import type { FormFields } from "../../schemas/auth.schema";
+import type { FormFields } from "../../schemas/login.schema";
 import { useState } from "react";
-import { registerUser } from "../../services/auth.service";
-export default function RegisterForm() {
+import { loginUser } from "../../services/auth.service";
+
+export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useUser();
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<FormFields>({ resolver: zodResolver(schema) });
+  } = useForm<FormFields>();
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try {
       setIsLoading(true);
-      const response = await registerUser({
+      const response = await loginUser({
         email: data.email,
         password: data.password,
-        username: data.username,
       });
-      setUser({ email: response.user?.email, id: response.user?.id });
-      navigate("/");
+      setUser({ email: response.user.email, id: response.user.id });
+      navigate(location.state?.from.pathname || "/");
     } catch (error: unknown) {
       setError("root", {
         message: error instanceof Error ? error.message : "Registration failed",
@@ -62,25 +61,7 @@ export default function RegisterForm() {
           {errors.email.message}
         </div>
       )}
-      <input
-        {...register("username")}
-        type="text"
-        placeholder="Username"
-        className="
-                w-full rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-800
-                px-3 py-2
-                text-sm
-                focus:outline-none focus:ring-2
-                focus:ring-blue-500
-                "
-      />
-      {errors.username && (
-        <div className="rounded bg-red-100 text-red-700 p-2 text-sm text-center">
-          {errors.username.message}
-        </div>
-      )}
+
       <input
         {...register("password")}
         type="password"
@@ -100,25 +81,7 @@ export default function RegisterForm() {
           {errors.password.message}
         </div>
       )}
-      <input
-        {...register("confirmPassword")}
-        type="password"
-        placeholder="Confirm Password"
-        className="
-                w-full rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-800
-                px-3 py-2
-                text-sm
-                focus:outline-none focus:ring-2
-                focus:ring-blue-500
-                "
-      />
-      {errors.confirmPassword && (
-        <div className="rounded bg-red-100 text-red-700 p-2 text-sm text-center">
-          {errors.confirmPassword.message}
-        </div>
-      )}
+
       <button
         type="submit"
         disabled={isLoading}
@@ -130,7 +93,7 @@ export default function RegisterForm() {
                 transition
                 "
       >
-        {isLoading ? "Loading..." : "Register"}
+        {isLoading ? "Loading..." : "Login"}
       </button>
       {errors.root && (
         <div className="rounded bg-red-100 text-red-700 p-2 text-sm text-center">

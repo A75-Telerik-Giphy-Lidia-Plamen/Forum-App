@@ -1,7 +1,13 @@
 import { useForm } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
 import type { FormFields } from "../../../schemas/login.schema";
+
 import { useLogin } from "../../../hooks/useLogin";
+import { useGoogleAuth } from "../../../hooks/useGoogleAuth";
+
+import { LoginFields } from "./LoginFields";
+import { GoogleLoginButton } from "../../ui/GoogleLoginButton";
+
 import { authFormStyles as s } from "../authForm.styles";
 
 export default function LoginForm() {
@@ -12,7 +18,14 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<FormFields>();
 
+  // Email/password login
   const { submit, isLoading } = useLogin(setError);
+
+  // Google login
+  const { login: googleLogin, isLoading: isGoogleLoading } =
+    useGoogleAuth((msg) =>
+      setError("root", { message: msg })
+    );
 
   const onSubmit: SubmitHandler<FormFields> = submit;
 
@@ -22,31 +35,10 @@ export default function LoginForm() {
       onSubmit={handleSubmit(onSubmit)}
       autoComplete="on"
     >
-      <input
-        {...register("email")}
-        type="email"
-        placeholder="Email"
-        className={s.input}
+      <LoginFields
+        register={register}
+        errors={errors}
       />
-
-      {errors.email && (
-        <div className={s.errorBox}>
-          {errors.email.message}
-        </div>
-      )}
-
-      <input
-        {...register("password")}
-        type="password"
-        placeholder="Password"
-        className={s.input}
-      />
-
-      {errors.password && (
-        <div className={s.errorBox}>
-          {errors.password.message}
-        </div>
-      )}
 
       <button
         type="submit"
@@ -61,6 +53,13 @@ export default function LoginForm() {
           {errors.root.message}
         </div>
       )}
+
+      <div className={s.divider}>or</div>
+
+      <GoogleLoginButton
+        onClick={googleLogin}
+        isLoading={isGoogleLoading}
+      />
     </form>
   );
 }

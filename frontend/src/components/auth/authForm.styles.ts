@@ -27,4 +27,14 @@ export const authFormStyles = {
     transition-colors
     disabled:opacity-60 disabled:cursor-not-allowed
   `,
+    divider: `
+    my-4 flex items-center text-xs uppercase tracking-wider
+    text-zinc-500
+    before:flex-1 before:border-t before:border-zinc-300 before:content-['']
+    after:flex-1 after:border-t after:border-zinc-300 after:content-['']
+    before:mr-3 after:ml-3
+    dark:text-zinc-400
+    dark:before:border-zinc-700
+    dark:after:border-zinc-700
+  `,
 };

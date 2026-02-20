@@ -11,6 +11,35 @@ interface Props {
 export function RegisterFields({ register, errors }: Props) {
     return (
         <>
+            <div className={authFormStyles.nameRow}>
+                <div>
+                    <input
+                        {...register("first_name")}
+                        type="text"
+                        placeholder="First Name"
+                        className={authFormStyles.input}
+                    />
+                    {errors.first_name && (
+                        <div className={authFormStyles.errorBox}>
+                            {errors.first_name.message}
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <input
+                        {...register("last_name")}
+                        type="text"
+                        placeholder="Last Name"
+                        className={authFormStyles.input}
+                    />
+                    {errors.last_name && (
+                        <div className={authFormStyles.errorBox}>
+                            {errors.last_name.message}
+                        </div>
+                    )}
+                </div>
+            </div>
             <input
                 {...register("email")}
                 type="text"

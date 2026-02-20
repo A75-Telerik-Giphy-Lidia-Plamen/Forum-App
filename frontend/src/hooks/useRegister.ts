@@ -14,6 +14,8 @@ export function useRegister() {
       setIsLoading(true);
 
       const response = await registerUser({
+        first_name: data.first_name,
+        last_name: data.last_name,
         email: data.email,
         password: data.password,
         username: data.username,

@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { UserProvider } from "./context/providers/UserProvider";
-import Register from "./pages/Register";
+import Register from "./pages/Register/Register";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Header from "./components/Header/Header";

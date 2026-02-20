@@ -27,7 +27,7 @@ export const authFormStyles = {
     transition-colors
     disabled:opacity-60 disabled:cursor-not-allowed
   `,
-    divider: `
+  divider: `
     my-4 flex items-center text-xs uppercase tracking-wider
     text-zinc-500
     before:flex-1 before:border-t before:border-zinc-300 before:content-['']
@@ -37,4 +37,8 @@ export const authFormStyles = {
     dark:before:border-zinc-700
     dark:after:border-zinc-700
   `,
+  nameRow: `
+  grid grid-cols-2 gap-4
+`,
+
 };

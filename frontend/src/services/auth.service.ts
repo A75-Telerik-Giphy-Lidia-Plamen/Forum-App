@@ -2,6 +2,8 @@ import { supabase } from "../config/supabaseClient";
 import type { LoginPayload, RegisterPayload } from "../types/payloads";
 
 export const registerUser = async ({
+  first_name,
+  last_name,
   email,
   password,
   username,
@@ -12,8 +14,8 @@ export const registerUser = async ({
     options: {
       data: {
         username: username?.toLowerCase().trim(),
-        first_name: null,
-        last_name: null,
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
       },
     },
   });

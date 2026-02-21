@@ -35,7 +35,6 @@ export const loginUser = async ({ email, password }: LoginPayload) => {
   if (error) {
     throw error;
   }
-
   return data;
 };
 

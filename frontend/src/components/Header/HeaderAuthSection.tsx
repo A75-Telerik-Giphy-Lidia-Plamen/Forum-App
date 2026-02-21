@@ -39,7 +39,7 @@ export function HeaderAuthSection() {
         Write
       </NavLink>
 
-      <NavLink to="/profile" className={s.link}>
+      <NavLink to={`/profile/${user.id}`} className={s.link}>
         Profile
       </NavLink>
 

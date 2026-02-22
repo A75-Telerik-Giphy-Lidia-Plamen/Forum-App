@@ -1,5 +1,6 @@
 import { supabase } from "../config/supabaseClient";
 import type { Profile } from "../types/Profile";
+import type { UpdateUserProfileInput } from './../types/payloads';
 
 export async function getUserById(
   id: string
@@ -10,7 +11,6 @@ export async function getUserById(
   .eq("id", id)
   .single();
   
-  console.log(data);
   if (error) {
     throw error;
   }
@@ -27,4 +27,35 @@ export async function getPostsByUser(userId: string) {
 
   if (error) throw new Error(error.message);
   return data;
+}
+
+export async function updateUserProfile(
+  payload: UpdateUserProfileInput
+): Promise<Profile> {
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("Not authenticated");
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .update({
+      first_name: payload.first_name,
+      last_name: payload.last_name,
+      bio: payload.bio,
+      avatar_url: payload.avatar_url,
+    })
+    .eq("id", user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as Profile;
 }

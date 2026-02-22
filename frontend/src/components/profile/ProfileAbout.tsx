@@ -35,7 +35,7 @@ export default function ProfileAbout(profile: Profile) {
           </div>
         </div>
 
-        {isOwner && <ProfileActions />}
+        {isOwner && profile.id && <ProfileActions id={profile.id} />}
       </div>
     </div>
   );

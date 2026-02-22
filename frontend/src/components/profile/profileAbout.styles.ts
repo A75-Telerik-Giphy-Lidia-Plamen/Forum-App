@@ -15,8 +15,11 @@ export const profileAboutStyles = {
   `,
 
   avatar: `
-    w-20 h-20 rounded-full object-cover
-    border border-zinc-300 dark:border-zinc-700
+  w-56 h-56
+  rounded-full
+  object-cover
+  border border-zinc-200 dark:border-zinc-700
+  shadow-lg
   `,
 
   name: `

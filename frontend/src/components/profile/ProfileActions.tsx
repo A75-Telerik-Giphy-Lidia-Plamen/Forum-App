@@ -1,9 +1,17 @@
+import { NavLink } from "react-router-dom";
 import { profileAboutStyles as s } from "./profileAbout.styles";
 
-export function ProfileActions() {
+type Props = {
+  id: string;
+};
+
+export function ProfileActions({ id }: Props) {
   return (
-    <button className={s.editButton}>
+    <NavLink 
+      to={`/profile/${id}/edit`}
+      className={s.editButton}
+    >
       Edit Profile
-    </button>
+    </NavLink>
   );
 }

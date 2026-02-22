@@ -7,6 +7,7 @@ import Header from "./components/Header/Header";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/AuthCallback";
 import Profile from "./pages/Profile/Profile";
+import EditProfilePage from "./pages/Profile/EditProfile";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/profile/:id" element={<Profile />} />
+            <Route path="/profile/:id/edit" element={<EditProfilePage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

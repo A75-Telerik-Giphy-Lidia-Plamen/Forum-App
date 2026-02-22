@@ -1,14 +1,14 @@
 export interface LoginPayload {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface RegisterPayload {
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    password: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  username: string;
+  password: string;
 }
 
 export type UpdateUserProfileInput = {
@@ -17,3 +17,9 @@ export type UpdateUserProfileInput = {
   bio: string | null;
   avatar_url: string | null;
 };
+
+export interface PostPayload {
+  title: string;
+  content: string;
+  tags?: string[];
+}

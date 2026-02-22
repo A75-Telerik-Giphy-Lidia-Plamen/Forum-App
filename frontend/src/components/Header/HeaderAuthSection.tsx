@@ -35,7 +35,7 @@ export function HeaderAuthSection() {
         Browse
       </NavLink>
 
-      <NavLink to="/write" className={s.link}>
+      <NavLink to="/create-post" className={s.link}>
         Write
       </NavLink>
 

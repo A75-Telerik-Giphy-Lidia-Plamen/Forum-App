@@ -1,16 +1,14 @@
 import { supabase } from "../config/supabaseClient";
 import type { Profile } from "../types/Profile";
-import type { UpdateUserProfileInput } from './../types/payloads';
+import type { UpdateUserProfileInput } from "./../types/payloads";
 
-export async function getUserById(
-  id: string
-): Promise<Profile> {
+export async function getUserById(id: string): Promise<Profile> {
   const { data, error } = await supabase
-  .from("users")
-  .select("*")
-  .eq("id", id)
-  .single();
-  
+    .from("users")
+    .select("*")
+    .eq("id", id)
+    .single();
+
   if (error) {
     throw error;
   }
@@ -30,7 +28,7 @@ export async function getPostsByUser(userId: string) {
 }
 
 export async function updateUserProfile(
-  payload: UpdateUserProfileInput
+  payload: UpdateUserProfileInput,
 ): Promise<Profile> {
   const {
     data: { user },

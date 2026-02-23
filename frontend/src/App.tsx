@@ -11,6 +11,7 @@ import CreatePost from "./pages/CreatePost/CreatePost";
 import Authenticated from "./hoc/Authenticated";
 import Browse from "./pages/Browse/Browse";
 import EditProfilePage from "./pages/Profile/EditProfile";
+import PostDetails from "./components/PostDetails/PostDetails";
 
 function App() {
   return (
@@ -43,6 +44,14 @@ function App() {
               element={
                 <Authenticated>
                   <CreatePost />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/posts/:id"
+              element={
+                <Authenticated>
+                  <PostDetails />
                 </Authenticated>
               }
             />

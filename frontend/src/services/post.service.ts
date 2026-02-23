@@ -87,3 +87,38 @@ export async function getPosts(): Promise<Post[]> {
     })),
   }));
 }
+
+export async function getPostById(id: string): Promise<Post> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      author:users(
+        username,
+        avatar_url,
+        user_media(public_url)
+      ),
+      tags:post_tags(tag:tags(name))
+    `,
+    )
+    .eq("id", id)
+    .eq("is_deleted", false)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return {
+    ...data,
+    author: data.author
+      ? {
+          username: data.author.username,
+          avatar_url:
+            data.author.user_media?.public_url ?? data.author.avatar_url,
+        }
+      : null,
+    tags: data.tags.map((t: { tag: { name: string } }) => ({
+      name: t.tag.name,
+    })),
+  };
+}

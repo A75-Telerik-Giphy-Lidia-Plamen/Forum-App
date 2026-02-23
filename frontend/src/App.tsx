@@ -12,6 +12,7 @@ import Authenticated from "./hoc/Authenticated";
 import Browse from "./pages/Browse/Browse";
 import EditProfilePage from "./pages/Profile/EditProfile";
 import PostDetails from "./components/PostDetails/PostDetails";
+import EditPost from "./pages/EditPost/EditPost";
 
 function App() {
   return (
@@ -52,6 +53,14 @@ function App() {
               element={
                 <Authenticated>
                   <PostDetails />
+                </Authenticated>
+              }
+            />
+            <Route
+              path="/posts/:id/edit"
+              element={
+                <Authenticated>
+                  <EditPost />
                 </Authenticated>
               }
             />

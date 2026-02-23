@@ -2,17 +2,33 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
-import { createPost } from "../../services/post.service";
+import { createPost, updatePost } from "../../services/post.service";
 import { styles } from "./PostForm.styles";
 
-export default function PostForm() {
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
+type PostFormProps = {
+  mode?: "create" | "edit";
+  postId?: string;
+  initialTitle?: string;
+  initialContent?: string;
+  initialTags?: string[];
+};
+
+export default function PostForm({
+  mode = "create",
+  postId,
+  initialTitle = "",
+  initialContent = "",
+  initialTags = [],
+}: PostFormProps) {
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [content, setContent] = useState<string>(initialContent);
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [tagInput, setTagInput] = useState<string>("");
   const [error, setError] = useState<string>("");
   const { user } = useUser();
   const navigate = useNavigate();
+
+  const isEdit = mode === "edit";
 
   function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter") return;
@@ -48,8 +64,13 @@ export default function PostForm() {
     }
 
     try {
-      await createPost({ title, content, tags }, user?.id);
-      navigate("/posts");
+      if (isEdit && postId) {
+        await updatePost(postId, { title, content, tags }, user?.id);
+        navigate(`/posts/${postId}`);
+      } else {
+        await createPost({ title, content, tags }, user?.id);
+        navigate("/posts");
+      }
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -71,9 +92,13 @@ export default function PostForm() {
           Back
         </button>
 
-        <h1 className={styles.heading}>Share Your Knowledge</h1>
+        <h1 className={styles.heading}>
+          {isEdit ? "Edit Your Post" : "Share Your Knowledge"}
+        </h1>
         <p className={styles.subheading}>
-          Help preserve a skill or piece of wisdom for the community.
+          {isEdit
+            ? "Update your post details below."
+            : "Help preserve a skill or piece of wisdom for the community."}
         </p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -144,7 +169,7 @@ export default function PostForm() {
 
           <div className={styles.actionsRow}>
             <button type="submit" className={styles.submitBtn}>
-              Publish Post
+              {isEdit ? "Save Changes" : "Publish Post"}
             </button>
             <button
               type="button"

@@ -1,7 +1,12 @@
 import { supabase } from "../config/supabaseClient";
 import type { PostPayload } from "../types/payloads";
 import type { Post } from "../types/Post";
+export type SortOption = "recent" | "popular" | "discussed";
 
+export type GetPostsParams = {
+  sort?: SortOption;
+  search?: string;
+};
 export async function createPost(
   { title, content, tags }: PostPayload,
   userId?: string,
@@ -54,8 +59,11 @@ export async function createPost(
   return post;
 }
 
-export async function getPosts(): Promise<Post[]> {
-  const { data, error } = await supabase
+export async function getPosts({
+  //sort = "recent",
+  search = "",
+}: GetPostsParams = {}): Promise<Post[]> {
+  let query = supabase
     .from("posts")
     .select(
       `
@@ -68,9 +76,15 @@ export async function getPosts(): Promise<Post[]> {
       tags:post_tags(tag:tags(name))
     `,
     )
-    .eq("is_deleted", false)
-    .order("created_at", { ascending: false });
+    .eq("is_deleted", false);
 
+  if (search.trim()) {
+    query = query.ilike("title", `%${search.trim()}%`);
+  }
+
+  query = query.order("created_at", { ascending: false });
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
 
   return (data ?? []).map((post) => ({
@@ -179,4 +193,19 @@ async function syncPostTags(postId: string, tags: string[] | undefined) {
     .insert(tagRecords.map((tag) => ({ post_id: postId, tag_id: tag.id })));
 
   if (insertError) throw new Error(insertError.message);
+}
+
+export async function deletePost(
+  postId: string,
+  userId: string | undefined,
+): Promise<void> {
+  if (!userId) throw new Error("User not authenticated");
+
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_deleted: true })
+    .eq("id", postId)
+    .eq("author_id", userId);
+
+  if (error) throw new Error(error.message);
 }

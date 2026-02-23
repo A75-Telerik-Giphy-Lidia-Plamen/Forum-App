@@ -9,7 +9,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { getPostById } from "../../services/post.service";
+import { getPostById, deletePost } from "../../services/post.service";
 import { useUser } from "../../hooks/useUser";
 import { styles } from "./PostDetails.styles";
 import type { Post } from "../../types/Post";
@@ -33,6 +33,8 @@ export default function PostDetail() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [comment, setComment] = useState<string>("");
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
   const isOwner = user?.id === post?.author_id;
 
@@ -43,6 +45,23 @@ export default function PostDetail() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  async function handleDelete() {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    try {
+      setDeleting(true);
+      await deletePost(post!.id, user?.id);
+      navigate("/posts");
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -74,19 +93,24 @@ export default function PostDetail() {
           <ArrowLeft className={styles.backIcon} />
           Back to posts
         </Link>
+
         <div className={styles.topRow}>
           <span className={styles.dateMeta}>
             <Clock className={styles.dateIcon} />
             {formatDate(post.created_at)}
           </span>
         </div>
+
         <h1 className={styles.title}>{post.title}</h1>
+
         <AuthorCard
           username={authorName}
           avatarUrl={post.author?.avatar_url}
           reputation={0}
         />
+
         <p className={styles.content}>{post.content}</p>
+
         {post.tags.length > 0 && (
           <div className={styles.tagsRow}>
             {post.tags.map((tag) => (
@@ -96,6 +120,7 @@ export default function PostDetail() {
             ))}
           </div>
         )}
+
         <div className={styles.divider} />
 
         <div className={styles.actionsRow}>
@@ -116,13 +141,24 @@ export default function PostDetail() {
               <Button onClick={() => navigate(`/posts/${post.id}/edit`)}>
                 <Pencil className={styles.actionIcon} /> Edit
               </Button>
-              <Button variant="danger">
-                <Trash2 className={styles.actionIcon} /> Delete
+              <Button
+                variant="danger"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                <Trash2 className={styles.actionIcon} />
+                {confirmDelete
+                  ? "Are you sure?"
+                  : deleting
+                    ? "Deleting..."
+                    : "Delete"}
               </Button>
+              {confirmDelete && (
+                <Button onClick={() => setConfirmDelete(false)}>Cancel</Button>
+              )}
             </div>
           )}
         </div>
-
         <div className={styles.commentsSection}>
           <h2 className={styles.commentsHeading}>Comments (0)</h2>
           <div className={styles.commentBox}>

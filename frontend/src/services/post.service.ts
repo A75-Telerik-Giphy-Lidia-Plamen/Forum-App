@@ -1,5 +1,6 @@
 import { supabase } from "../config/supabaseClient";
 import type { PostPayload } from "../types/payloads";
+import type { Post } from "../types/Post";
 
 export async function createPost(
   { title, content, tags }: PostPayload,
@@ -51,4 +52,38 @@ export async function createPost(
   }
 
   return post;
+}
+
+export async function getPosts(): Promise<Post[]> {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      author:users(
+        username,
+        avatar_url,
+        user_media(public_url)
+      ),
+      tags:post_tags(tag:tags(name))
+    `,
+    )
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((post) => ({
+    ...post,
+    author: post.author
+      ? {
+          username: post.author.username,
+          avatar_url:
+            post.author.user_media?.public_url ?? post.author.avatar_url,
+        }
+      : null,
+    tags: post.tags.map((t: { tag: { name: string } }) => ({
+      name: t.tag.name,
+    })),
+  }));
 }

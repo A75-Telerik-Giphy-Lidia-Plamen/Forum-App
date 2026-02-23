@@ -12,30 +12,34 @@ export default function ProfileAbout(profile: Profile) {
   const isOwner = user?.id === profile.id;
 
   return (
-    <div className={s.card}>
-      <div className={s.header}>
-        <div className={s.leftSection}>
-          <ProfileAvatar
-            avatarUrl={profile.avatar_url}
-            username={profile.username}
-          />
+    <div className={s.page}>
+      <div className={s.container}>
+        <div className={s.card}>
+          <div className={s.header}>
+            <div className={s.leftSection}>
+              <ProfileAvatar
+                avatarUrl={profile.avatar_url}
+                username={profile.username}
+              />
 
-          <div>
-            <ProfileMeta
-              firstName={profile.first_name}
-              lastName={profile.last_name}
-              username={profile.username}
-              bio={profile.bio}
-            />
+              <div>
+                <ProfileMeta
+                  firstName={profile.first_name}
+                  lastName={profile.last_name}
+                  username={profile.username}
+                  bio={profile.bio}
+                />
 
-            <ProfileStats
-              reputation={profile.reputation}
-              createdAt={profile.created_at}
-            />
+                <ProfileStats
+                  reputation={profile.reputation}
+                  createdAt={profile.created_at}
+                />
+              </div>
+            </div>
+
+            {isOwner && profile.id && <ProfileActions id={profile.id} />}
           </div>
         </div>
-
-        {isOwner && profile.id && <ProfileActions id={profile.id} />}
       </div>
     </div>
   );

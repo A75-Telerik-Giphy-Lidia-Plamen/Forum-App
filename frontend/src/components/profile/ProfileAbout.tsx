@@ -9,17 +9,23 @@ import { BadgesSection } from "./Badges/ProfileBadges";
 import { useEffect, useState } from "react";
 import { getUserBadges } from "../../services/badges.service";
 import type { UserBadgeRow, BadgeRow } from "../../types/Badge";
+import { getPostsByAuthor } from "../../services/post.service";
+import type { Post } from "../../types/Post";
+import ProfilePosts from "./ProfilePosts/ProfilePosts";
 
 
 export default function ProfileAbout(profile: Profile) {
   const [badges, setBadges] = useState<UserBadgeRow[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const { user } = useUser();
   const isOwner = user?.id === profile.id;
 
   useEffect(() => {
     async function load() {
       const data = await getUserBadges(profile.id);
+      const postsData = await getPostsByAuthor(profile.id);
       setBadges(data ?? []);
+      setPosts(postsData ?? []);
     }
 
     load();
@@ -57,6 +63,9 @@ export default function ProfileAbout(profile: Profile) {
 
             {isOwner && profile.id && <ProfileActions id={profile.id} />}
           </div>
+        </div>
+        <div>
+          <ProfilePosts posts={posts}/>
         </div>
       </div>
     </div>

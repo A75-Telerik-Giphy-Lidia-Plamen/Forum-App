@@ -209,3 +209,42 @@ export async function deletePost(
 
   if (error) throw new Error(error.message);
 }
+
+export async function getPostsByAuthor(
+  authorId: string,
+): Promise<Post[]> {
+  let query = supabase
+    .from("posts")
+    .select(
+      `
+      *,
+      author:users(
+        username,
+        avatar_url,
+        user_media(public_url)
+      ),
+      tags:post_tags(tag:tags(name))
+    `
+    )
+    .eq("is_deleted", false)
+    .eq("author_id", authorId);
+
+  query = query.order("created_at", { ascending: false });
+
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((post) => ({
+    ...post,
+    author: post.author
+      ? {
+          username: post.author.username,
+          avatar_url:
+            post.author.avatar_url,
+        }
+      : null,
+    tags: post.tags.map((t: { tag: { name: string } }) => ({
+      name: t.tag.name,
+    })),
+  }));
+}

@@ -74,6 +74,7 @@ export default function PostForm({
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
+        console.error()
       } else {
         setError("An unknown error occurred");
       }

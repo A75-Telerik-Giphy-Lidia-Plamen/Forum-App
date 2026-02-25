@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { editProfileSchema } from "../../schemas/editProfile.schema";
-import { updateUserProfile } from "../../services/user.service";
-import type { Profile } from "../../types/Profile";
-import type { FormFields } from "../../schemas/editProfile.schema";
+import { editProfileSchema } from "../../../schemas/editProfile.schema";
+import { updateUserProfile } from "../../../services/user.service";
+import type { Profile } from "../../../types/Profile";
+import type { FormFields } from "../../../schemas/editProfile.schema";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, type RefObject } from "react";
-import { uploadFileToS3 } from "../../services/S3PhotoUpload.service";
+import { uploadFileToS3 } from "../../../services/S3PhotoUpload.service";
 import EditProfileFormFields from "./EditProfileFormFields";
 import { editProfileStyles as s } from "./EditProfileForm.styles";
 import { ArrowLeft } from "lucide-react";

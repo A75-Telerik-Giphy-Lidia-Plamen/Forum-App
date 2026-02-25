@@ -1,8 +1,8 @@
-import type { Badge } from "../../types/Badge";
+import type { BadgeRow } from "../../../types/Badge";
 import { badgesSectionStyles as s } from "./ProfileBadges.styles";
 
 type BadgesSectionProps = {
-  badges: Badge[];
+  badges: BadgeRow[];
 };
 
 export function BadgesSection({ badges }: BadgesSectionProps) {
@@ -19,17 +19,17 @@ export function BadgesSection({ badges }: BadgesSectionProps) {
       <div className={s.grid}>
         {badges.map((b) => (
           <div
-            key={b.badges.id}
+            key={b.id}
             className={s.badgeWrapper}
           >
             <img
-              src={b.badges.icon}
-              alt={b.badges.name}
+              src={b.icon}
+              alt={b.name}
               className={s.badgeImage}
             />
 
             <div className={s.tooltip}>
-              {b.badges.description}
+              {b.description}
             </div>
           </div>
         ))}

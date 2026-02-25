@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import EditProfileForm from "../../components/profile/EditProfileForm";
 import { useProfile } from "../../hooks/useProfile";
+import EditProfileForm from "../../components/profile/EditProfile/EditProfileForm";
 
 export default function EditProfilePage() {
   const { id } = useParams();

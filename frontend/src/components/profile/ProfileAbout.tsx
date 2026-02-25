@@ -5,31 +5,28 @@ import { ProfileMeta } from "./ProfileMeta";
 import { ProfileStats } from "./ProfileStats";
 import { ProfileActions } from "./ProfileActions";
 import type { Profile } from "../../types/Profile";
-import { BadgesSection } from "./ProfileBadges";
+import { BadgesSection } from "./Badges/ProfileBadges";
 import { useEffect, useState } from "react";
 import { getUserBadges } from "../../services/badges.service";
-import type { Badge } from "../../types/Badge";
+import type { UserBadgeRow, BadgeRow } from "../../types/Badge";
+
 
 export default function ProfileAbout(profile: Profile) {
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badges, setBadges] = useState<UserBadgeRow[]>([]);
   const { user } = useUser();
   const isOwner = user?.id === profile.id;
 
   useEffect(() => {
     async function load() {
       const data = await getUserBadges(profile.id);
-      console.log(data);
-      const normalized: Badge[] =
-        data?.map((row) => ({
-          awarded_at: row.awarded_at,
-          badges: row.badges,
-        })) ?? [];
-
-      setBadges(normalized);
+      setBadges(data ?? []);
     }
 
     load();
   }, [profile.id]);
+
+  const flatBadges: BadgeRow[] = badges.flatMap((r) => r.badges);
+
 
   return (
     <div className={s.page}>
@@ -54,7 +51,7 @@ export default function ProfileAbout(profile: Profile) {
                   reputation={profile.reputation}
                   createdAt={profile.created_at}
                 />
-                <BadgesSection badges={badges} />
+                <BadgesSection badges={flatBadges} />
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import type { FormFields } from "../../schemas/editProfile.schema";
+import type { FormFields } from "../../../schemas/editProfile.schema";
 import { editProfileStyles as s } from "./EditProfileForm.styles";
 
 type Props = {

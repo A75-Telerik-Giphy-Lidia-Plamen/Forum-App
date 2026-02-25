@@ -8,3 +8,16 @@ export type Badge = {
     icon: string;
   };
 };
+
+export type BadgeRow = {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+};
+
+export type UserBadgeRow = {
+  awarded_at: string;
+  badges: BadgeRow[];
+};

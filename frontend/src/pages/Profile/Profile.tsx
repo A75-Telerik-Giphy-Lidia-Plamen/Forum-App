@@ -1,6 +1,7 @@
 import { Navigate, useParams } from "react-router-dom";
 import { useProfile } from "../../hooks/useProfile";
 import ProfileAbout from "../../components/profile/ProfileAbout";
+import Loading from "../../components/ui/Loading";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
@@ -12,11 +13,7 @@ export default function Profile() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Loading profile...
-      </div>
-    );
+    return <Loading />
   }
 
   if (error || !profile) {

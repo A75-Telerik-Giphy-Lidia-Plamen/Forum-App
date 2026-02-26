@@ -65,7 +65,7 @@ export default function ProfileAbout(profile: Profile) {
           </div>
         </div>
         <div>
-          <ProfilePosts posts={posts}/>
+          <ProfilePosts posts={posts} firstname={profile.first_name}/>
         </div>
       </div>
     </div>

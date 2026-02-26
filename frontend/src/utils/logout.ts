@@ -1,7 +1,7 @@
 import { logoutUser } from "../services/auth.service";
-import type { User } from "../types/User";
+import type { Profile } from "../types/Profile";
 
-export const logout = (setUser: (user: User | null) => void) => {
+export const logout = (setUser: (user: Profile | null) => void) => {
   logoutUser();
   setUser(null);
 };

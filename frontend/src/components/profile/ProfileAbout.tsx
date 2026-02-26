@@ -54,7 +54,7 @@ export default function ProfileAbout(profile: Profile) {
                 />
 
                 <ProfileStats
-                  reputation={profile.reputation}
+                  // reputation={profile.reputation} will fix when we add comments and upvotes logic
                   createdAt={profile.created_at}
                 />
                 <BadgesSection badges={flatBadges} />

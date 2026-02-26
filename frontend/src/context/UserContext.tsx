@@ -1,9 +1,9 @@
 import { createContext } from "react";
-import type { User } from "../types/User";
+import type { Profile } from "../types/Profile";
 
 interface UserContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: Profile | null;
+  setUser: (user: Profile | null) => void;
   loading: boolean
 }
 

@@ -6,6 +6,7 @@ export interface Profile extends User {
   last_name: string;
   bio: string | null;
   avatar_url: string | null;
-  reputation: number;
+  role: "user" | "admin";
+  is_blocked: boolean;
   created_at: string;
 }

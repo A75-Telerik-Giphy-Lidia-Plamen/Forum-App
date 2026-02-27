@@ -51,10 +51,11 @@ export default function PostCard({
           <div className={styles.compactMeta}>
             <span>{authorName}</span>
             <span className={styles.statItem}>
-              <Heart className={styles.statIcon} /> 0
+              <Heart className={styles.statIcon} /> {post.likes_count}
             </span>
             <span className={styles.statItem}>
-              <MessageCircle className={styles.statIcon} /> 0
+              <MessageCircle className={styles.statIcon} />{" "}
+              {post.comments_count}
             </span>
           </div>
         </div>
@@ -98,10 +99,10 @@ export default function PostCard({
             <span className={styles.authorName}>{authorName}</span>
           </div>
           <span className={styles.statItem}>
-            <Heart className={styles.statIcon} /> 0
+            <Heart className={styles.statIcon} /> {post.likes_count}
           </span>
           <span className={styles.statItem}>
-            <MessageCircle className={styles.statIcon} /> 0
+            <MessageCircle className={styles.statIcon} /> {post.comments_count}
           </span>
           <span className={styles.statItem}>
             <Clock className={styles.statIcon} />

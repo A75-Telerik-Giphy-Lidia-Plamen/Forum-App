@@ -23,3 +23,13 @@ export interface PostPayload {
   content: string;
   tags?: string[];
 }
+
+export interface CommentPayload {
+  content: string;
+}
+
+export interface VotePayload {
+  target_type: "post" | "comment";
+  target_id: string;
+  value: 1 | -1;
+}

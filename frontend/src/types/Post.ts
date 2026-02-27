@@ -7,6 +7,9 @@ export type Post = {
   is_deleted: boolean;
   created_at: string;
   updated_at: string | null;
+  likes_count: number;
+  dislikes_count: number;
+  comments_count: number;
   author: {
     username: string;
     avatar_url: string | null;

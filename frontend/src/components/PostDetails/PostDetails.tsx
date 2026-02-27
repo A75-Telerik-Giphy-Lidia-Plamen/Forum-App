@@ -1,20 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  Clock,
-  ThumbsUp,
-  ThumbsDown,
-  MessageCircle,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Clock, Pencil, Trash2 } from "lucide-react";
 import { getPostById, deletePost } from "../../services/post.service";
 import { useUser } from "../../hooks/useUser";
 import { styles } from "./PostDetails.styles";
 import type { Post } from "../../types/Post";
 import AuthorCard from "../AuthorCard/AuthorCard";
 import Button from "../ui/Button/Button";
+import VoteButtons from "../VoteButtons/VoteButtons";
+import CommentSection from "../CommentSection/CommentSection";
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -32,7 +26,6 @@ export default function PostDetail() {
   const [post, setPost] = useState<Post | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [comment, setComment] = useState<string>("");
   const [deleting, setDeleting] = useState<boolean>(false);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
@@ -45,6 +38,23 @@ export default function PostDetail() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  function handleVote(value: 1 | -1, previousValue: 1 | -1 | null) {
+    setPost((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev };
+
+      if (previousValue === 1) updated.likes_count -= 1;
+      if (previousValue === -1) updated.dislikes_count -= 1;
+
+      if (previousValue !== value) {
+        if (value === 1) updated.likes_count += 1;
+        if (value === -1) updated.dislikes_count += 1;
+      }
+
+      return updated;
+    });
+  }
 
   async function handleDelete() {
     if (!confirmDelete) {
@@ -125,15 +135,12 @@ export default function PostDetail() {
 
         <div className={styles.actionsRow}>
           <div className={styles.actionsLeft}>
-            <Button>
-              <ThumbsUp className={styles.actionIcon} /> 0
-            </Button>
-            <Button>
-              <ThumbsDown className={styles.actionIcon} /> 0
-            </Button>
-            <Button>
-              <MessageCircle className={styles.actionIcon} /> 0 comments
-            </Button>
+            <VoteButtons
+              postId={post.id}
+              likesCount={post.likes_count}
+              dislikesCount={post.dislikes_count}
+              onVote={handleVote}
+            />
           </div>
 
           {isOwner && (
@@ -159,20 +166,8 @@ export default function PostDetail() {
             </div>
           )}
         </div>
-        <div className={styles.commentsSection}>
-          <h2 className={styles.commentsHeading}>Comments (0)</h2>
-          <div className={styles.commentBox}>
-            <textarea
-              className={styles.commentTextarea}
-              placeholder="Share your thoughts or experience..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <button type="button" className={styles.commentSubmitBtn}>
-              Post Comment
-            </button>
-          </div>
-        </div>
+
+        <CommentSection postId={post.id} />
       </div>
     </div>
   );

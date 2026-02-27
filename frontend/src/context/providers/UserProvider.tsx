@@ -10,88 +10,56 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
-      try {
-        const { data, error } = await supabase.auth.getUser();
+    async function bootstrap() {
+      const { data, error } = await supabase.auth.getSession();
 
-        if (error) {
-          console.error("getUser Error: ", error);
-        }
+      if (!mounted) return;
 
-        if (!mounted) {
-          return;
-        }
-
-        const authUser = data?.user ?? null;
-
-        if (!authUser) {
-          setUser(null);
-          return;
-        }
-
-        const {
-          data: profile,
-          error: profileError,
-        } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", authUser.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error("Fetching Profile Error: ", profileError)
-        }
-
-        if (!mounted) {
-          return;
-        }
-
-        if (!profile) {
-          console.log("No profile row found, using fallback");
-
-          setUser({
-            id: authUser.id,
-            email: authUser.email!,
-            role: "user",
-            is_blocked: false,
-          } as Profile);
-        } else {
-          setUser(profile as Profile);
-        }
-      } catch (err) {
-        console.error("Bootstrap error", err);
-        if (mounted) setUser(null);
-      } finally {
-        if (mounted) setLoading(false);
+      if (error) {
+        console.error("getSession error:", error);
+        setLoading(false);
+        return;
       }
-    })();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
+      const authUser = data.session?.user;
 
-        console.log("Auth event:", event);
+      if (!authUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
 
-        if (event === "SIGNED_OUT") {
-          setUser(null);
-          return;
-        }
+      const { data: profile, error: profileError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle();
 
-        if (event !== "TOKEN_REFRESHED") return;
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
 
-        if (!session?.user) return;
-
-        const { data: profile } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        if (!mounted) return;
-
+        setUser({
+          id: authUser.id,
+          email: authUser.email!,
+          role: "user",
+          is_blocked: false,
+        } as Profile);
+      } else {
         setUser(profile ?? null);
       }
-    );
+
+      setLoading(false);
+    }
+
+    bootstrap();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (!mounted) return;
+
+      if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
+    });
 
     return () => {
       mounted = false;

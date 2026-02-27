@@ -23,7 +23,7 @@ export const registerUser = async ({
   if (error) {
     throw error;
   }
-  return data;
+  return data.user;
 };
 
 export const loginUser = async ({ email, password }: LoginPayload) => {

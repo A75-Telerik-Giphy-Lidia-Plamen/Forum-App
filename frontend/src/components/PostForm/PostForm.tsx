@@ -63,6 +63,11 @@ export default function PostForm({
       return;
     }
 
+    if (user?.is_blocked) {
+      setError("Your account is blocked from posting.");
+      return;
+    }
+
     try {
       if (isEdit && postId) {
         await updatePost(postId, { title, content, tags }, user?.id);

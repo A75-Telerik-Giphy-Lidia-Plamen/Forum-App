@@ -1,8 +1,10 @@
+import type { Profile } from './../types/Profile';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../hooks/useUser";
 import { registerUser } from "../services/auth.service";
 import type { FormFields } from "../schemas/auth.schema";
+import { supabase } from "../config/supabaseClient";
 
 export function useRegister() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +15,7 @@ export function useRegister() {
     try {
       setIsLoading(true);
 
-      const response = await registerUser({
+      const authUser = await registerUser({
         first_name: data.first_name,
         last_name: data.last_name,
         email: data.email,
@@ -21,10 +23,20 @@ export function useRegister() {
         username: data.username,
       });
 
-      setUser({
-        email: response.user?.email,
-        id: response.user?.id,
-      });
+      if (!authUser) throw new Error("No auth user returned");
+      
+            // Fetch profile from public.users
+            const { data: profile, error } = await supabase
+              .from("users")
+              .select("*")
+              .eq("id", authUser.id)
+              .maybeSingle();
+      
+            if (error) {
+              throw error;
+            }
+      
+            setUser(profile as Profile);
 
       navigate("/");
     } finally {

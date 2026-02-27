@@ -13,6 +13,11 @@ import Browse from "./pages/Browse/Browse";
 import EditProfilePage from "./pages/Profile/EditProfile";
 import PostDetails from "./components/PostDetails/PostDetails";
 import EditPost from "./pages/EditPost/EditPost";
+import { AdminOnly } from "./hoc/Admin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminPosts from "./pages/admin/AdminPosts";
 
 function App() {
   return (
@@ -65,6 +70,18 @@ function App() {
               }
             />
             <Route path="/profile/:id/edit" element={<EditProfilePage />} />
+            <Route
+              path="/admin/*"
+              element={
+                <AdminOnly>
+                  <AdminLayout />
+                </AdminOnly>
+              }
+            >
+              <Route index element={<AdminDashboard />}/>
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="posts" element={<AdminPosts />} />
+            </Route>
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

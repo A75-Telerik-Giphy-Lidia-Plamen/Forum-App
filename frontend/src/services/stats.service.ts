@@ -10,7 +10,7 @@ export async function getPlatformStats() {
         supabase.from("users").select("*", { count: "exact", head: true }),
         supabase.from("posts").select("*", { count: "exact", head: true }),
         supabase.from("comments").select("*", { count: "exact", head: true }),
-        supabase.from("votes").select("*", { count: "exact", head: true }),
+        supabase.from("tags").select("*", { count: "exact", head: true }),
     ]);
 
     return {

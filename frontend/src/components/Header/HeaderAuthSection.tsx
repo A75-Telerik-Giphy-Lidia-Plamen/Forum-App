@@ -43,6 +43,10 @@ export function HeaderAuthSection() {
         Profile
       </NavLink>
 
+      { user.role === "admin" && <NavLink to="/admin" className={s.link}>
+        Admin Panel
+      </NavLink> }
+
       <button onClick={handleLogout} className={s.link}>
         Logout
       </button>

@@ -2,57 +2,99 @@ import { useEffect, useState } from "react";
 import { UserContext } from "../UserContext";
 import { supabase } from "../../config/supabaseClient";
 import type { Profile } from "../../types/Profile";
-import type { User } from "@supabase/supabase-js";
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let alive = true;
-
-    async function setFromSession(sessionUser: User | null) {
-      if (!alive) return;
-
-      if (!sessionUser) {
-        setUser(null);
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", sessionUser.id)
-        .single();
-
-      if (!alive) return;
-
-      if (error || !profile) {
-        // fallback: user as signed-in, but with minimal info
-        setUser({
-          id: sessionUser.id,
-          email: sessionUser.email!,
-          role: "user",
-          is_blocked: false,
-        } as unknown as Profile);
-        return;
-      }
-
-      setUser(profile as Profile);
-    }
+    let mounted = true;
 
     (async () => {
-      const { data } = await supabase.auth.getSession();
-      await setFromSession(data.session?.user ?? null);
-      if (alive) setLoading(false);
+      try {
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error) {
+          console.error("getUser Error: ", error);
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        const authUser = data?.user ?? null;
+
+        if (!authUser) {
+          setUser(null);
+          return;
+        }
+
+        const {
+          data: profile,
+          error: profileError,
+        } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", authUser.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error("Fetching Profile Error: ", profileError)
+        }
+
+        if (!mounted) {
+          return;
+        }
+
+        if (!profile) {
+          console.log("No profile row found, using fallback");
+
+          setUser({
+            id: authUser.id,
+            email: authUser.email!,
+            role: "user",
+            is_blocked: false,
+          } as Profile);
+        } else {
+          setUser(profile as Profile);
+        }
+      } catch (err) {
+        console.error("Bootstrap error", err);
+        if (mounted) setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     })();
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      await setFromSession(session?.user ?? null);
-    });
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log("Auth event:", event);
+
+        if (event === "SIGNED_OUT") {
+          setUser(null);
+          return;
+        }
+
+        if (event !== "TOKEN_REFRESHED") return;
+
+        if (!session?.user) return;
+
+        const { data: profile } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (!mounted) return;
+
+        setUser(profile ?? null);
+      }
+    );
 
     return () => {
-      alive = false;
+      mounted = false;
       sub.subscription.unsubscribe();
     };
   }, []);

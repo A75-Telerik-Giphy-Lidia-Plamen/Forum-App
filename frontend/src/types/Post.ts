@@ -13,6 +13,7 @@ export type Post = {
   author: {
     username: string;
     avatar_url: string | null;
+    reputation: number;
   } | null;
   tags: { name: string }[];
 };

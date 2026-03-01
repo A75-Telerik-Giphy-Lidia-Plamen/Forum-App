@@ -44,8 +44,8 @@ export default function ProfileAbout(profile: Profile) {
                 avatarUrl={profile.avatar_url}
                 username={profile.username}
               />
-
-              <div>
+            </div>
+            <div className={s.metaSection}>
                 <ProfileMeta
                   firstName={profile.first_name}
                   lastName={profile.last_name}
@@ -54,15 +54,14 @@ export default function ProfileAbout(profile: Profile) {
                 />
 
                 <ProfileStats
-                  // reputation={profile.reputation} will fix when we add comments and upvotes logic
+                  reputation={profile.reputation}
                   createdAt={profile.created_at}
                 />
-                <BadgesSection badges={flatBadges} />
-              </div>
             </div>
 
             {isOwner && profile.id && <ProfileActions id={profile.id} />}
           </div>
+                <BadgesSection badges={flatBadges} />
         </div>
         <div>
           <ProfilePosts posts={posts} firstname={profile.first_name}/>

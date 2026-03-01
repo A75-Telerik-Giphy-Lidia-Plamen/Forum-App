@@ -12,6 +12,7 @@ import PostCard from "../../components/PostCard/PostCard";
 import type { Post } from "../../types/Post";
 import type { SortOption } from "../../services/post.service";
 import { styles } from "./Browse.styles";
+import Loading from "../../components/ui/Loading";
 
 const SORT_OPTIONS: { key: SortOption; label: string }[] = [
   { key: "recent", label: "Recent" },
@@ -82,7 +83,7 @@ export default function Browse() {
 
         {error && <p className={styles.errorBox}>{error}</p>}
 
-        {loading && <p className={styles.loadingText}>Loading posts...</p>}
+        {loading && <Loading />}
 
         {!loading && !error && (
           <>

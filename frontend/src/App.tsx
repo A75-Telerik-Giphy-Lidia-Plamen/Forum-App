@@ -18,6 +18,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminPosts from "./pages/admin/AdminPosts";
+import PostsByTag from "./components/Home/Tags/PostsByTag";
+import Footer from "./components/ui/Footer";
 
 function App() {
   return (
@@ -45,6 +47,7 @@ function App() {
                 </Authenticated>
               }
             ></Route>
+            <Route path="/posts/tag/:tagId" element={<PostsByTag />} />
             <Route
               path="/create-post"
               element={
@@ -85,6 +88,7 @@ function App() {
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Footer />
         </UserProvider>
       </BrowserRouter>
     </>

@@ -6,10 +6,10 @@ export const homeBannerStyles = {
     absolute inset-0 h-full w-full object-cover
   `,
   overlay: `
-    absolute inset-0 bg-black/30
+    absolute inset-0 bg-black/40
   `,
   contentWrapper: `
-    relative z-10 flex h-full items-center px-12
+    relative z-10 flex h-full items-center px-24
   `,
   container: `
     max-w-2xl text-white

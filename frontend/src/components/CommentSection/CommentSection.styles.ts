@@ -1,19 +1,78 @@
 export const styles = {
   section: "mt-6",
-  heading: "text-xl font-semibold mb-4",
-  error: "text-red-500 text-sm mb-2",
+
+  heading: `
+    text-xl font-semibold mb-4
+    text-stone-900
+    dark:text-zinc-100
+  `,
+
+  error: `
+    text-red-600 text-sm mb-2
+    dark:text-red-400
+  `,
+
   commentBox: "flex flex-col gap-2 mb-6",
-  textarea: "w-full border rounded p-3 text-sm resize-none min-h-[100px]",
-  submitBtn:
-    "self-end px-4 py-2 bg-blue-600 text-white rounded text-sm disabled:opacity-50",
-  loginNote: "text-sm text-gray-400",
-  loadingText: "text-sm text-gray-400",
-  emptyText: "text-sm text-gray-400",
+
+  textarea: `
+    w-full border border-stone-200 bg-white rounded p-3 text-sm resize-none min-h-[100px]
+    text-stone-800 placeholder:text-stone-400
+    focus:outline-none focus:ring-2 focus:ring-orange-300
+
+    dark:bg-zinc-900 dark:border-zinc-800
+    dark:text-zinc-200 dark:placeholder:text-zinc-500
+    dark:focus:ring-orange-500/40
+  `,
+
+  submitBtn: `
+    self-end px-4 py-2 bg-orange-500 hover:bg-orange-600
+    text-white rounded text-sm transition-colors
+    disabled:opacity-50 disabled:cursor-not-allowed
+
+    dark:bg-orange-500 dark:hover:bg-orange-400
+  `,
+
+  loginNote: `
+    text-sm text-stone-400
+    dark:text-zinc-500
+  `,
+
+  loadingText: `
+    text-sm text-stone-400
+    dark:text-zinc-500
+  `,
+
+  emptyText: `
+    text-sm text-stone-400
+    dark:text-zinc-500
+  `,
+
   commentsList: "flex flex-col gap-4",
-  commentItem: "border rounded p-4",
+
+  commentItem: `
+    border border-stone-200 bg-white rounded p-4
+    dark:border-zinc-800 dark:bg-zinc-900
+  `,
+
   commentHeader: "flex justify-between items-center mb-1",
-  commentAuthor: "font-semibold text-sm",
-  commentDate: "text-xs text-gray-400",
-  commentContent: "text-sm",
-  deleteBtn: "text-xs text-red-500 mt-2",
+
+  commentAuthor: `
+    font-semibold text-sm text-stone-900
+    dark:text-zinc-100
+  `,
+
+  commentDate: `
+    text-xs text-stone-400
+    dark:text-zinc-500
+  `,
+
+  commentContent: `
+    text-sm text-stone-700
+    dark:text-zinc-300
+  `,
+
+  deleteBtn: `
+    text-xs text-red-500 mt-2 hover:underline
+    dark:text-red-400
+  `,
 };

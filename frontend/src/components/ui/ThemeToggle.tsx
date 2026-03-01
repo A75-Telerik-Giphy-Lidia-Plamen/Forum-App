@@ -1,33 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
 
 export default function ThemeToggle() {
-    function toggler(): void {
-        const html = document.documentElement;
-        const current = html.dataset.theme ?? "light";
-        const next = current === "light" ? "dark" : "light";
-        
-        html.dataset.theme = next;
-        localStorage.setItem("theme", next);
-    }
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+    return saved ?? "light";
+  });
 
-    useEffect(() => {
-        const saved = localStorage.getItem("theme");
-        if (saved) {
-            document.documentElement.dataset.theme = saved;
-        }
-    }, []);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
-    return (
+  function toggle() {
+    const next = theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+    setTheme(next);
+  }
+
+  return (
     <button
-      onClick={toggler}
-      className="px-3 py-2 rounded-md
-        border
-        text-sm
-        transition-colors
-        bg-neutral-200 dark:bg-neutral-800
-        text-neutral-800 dark:text-neutral-200
-        hover:bg-neutral-300 dark:hover:bg-neutral-700"
+      onClick={toggle}
+      aria-label="Toggle theme"
+      className="
+        relative w-10 h-10
+        flex items-center justify-center
+        rounded-full
+        border border-stone-200 dark:border-zinc-700
+        bg-white dark:bg-zinc-900
+        text-stone-700 dark:text-zinc-200
+        hover:bg-stone-100 dark:hover:bg-zinc-800
+        transition-all duration-200
+      "
     >
-      Theme
-    </button>);
+      {theme === "light" ? (
+        <Moon className="w-4 h-4 transition-transform duration-300 rotate-0" />
+      ) : (
+        <Sun className="w-4 h-4 transition-transform duration-300 rotate-0 text-orange-400" />
+      )}
+    </button>
+  );
 }

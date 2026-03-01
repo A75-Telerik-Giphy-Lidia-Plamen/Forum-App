@@ -9,4 +9,5 @@ export interface Profile extends User {
   role: "user" | "admin";
   is_blocked: boolean;
   created_at: string;
+  reputation: number;
 }

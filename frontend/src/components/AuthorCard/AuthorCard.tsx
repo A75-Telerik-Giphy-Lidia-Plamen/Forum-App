@@ -25,6 +25,7 @@ export default function AuthorCard({
   reputation = 0,
 }: AuthorCardProps) {
   const initials = getInitials(username);
+  console.log(reputation)
 
   return (
     <div className={styles.card}>
@@ -36,14 +37,28 @@ export default function AuthorCard({
         )}
         <div>
           <p className={styles.name}>{username}</p>
-          <div className={styles.reputationRow}>
-            <span className={styles.reputationIcon}>★</span>
+          <div className="mt-1 space-y-1">
+
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1">
+                <span className={styles.reputationIcon}>★</span>
+                <span className="text-stone-600 dark:text-zinc-300 font-medium">
+                  Reputation
+                </span>
+              </div>
+
+              <span className="text-stone-500 dark:text-zinc-400">
+                {reputation} pts
+              </span>
+            </div>
+
             <div className={styles.reputationBar}>
               <div
                 className={styles.reputationFill}
                 style={{ width: getReputationWidth(reputation) }}
               />
             </div>
+
           </div>
         </div>
       </div>

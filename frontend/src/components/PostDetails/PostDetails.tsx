@@ -9,6 +9,7 @@ import AuthorCard from "../AuthorCard/AuthorCard";
 import Button from "../ui/Button/Button";
 import VoteButtons from "../VoteButtons/VoteButtons";
 import CommentSection from "../CommentSection/CommentSection";
+import Loading from "../ui/Loading";
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -75,9 +76,7 @@ export default function PostDetail() {
 
   if (loading) {
     return (
-      <div className={styles.page}>
-        <p className={styles.loadingText}>Loading post...</p>
-      </div>
+      <Loading />
     );
   }
 
@@ -112,12 +111,13 @@ export default function PostDetail() {
         </div>
 
         <h1 className={styles.title}>{post.title}</h1>
-
+        <Link to={`/profile/${post.author_id}`}>
         <AuthorCard
           username={authorName}
           avatarUrl={post.author?.avatar_url}
-          reputation={0}
+          reputation={post.author?.reputation}
         />
+        </Link>
 
         <p className={styles.content}>{post.content}</p>
 

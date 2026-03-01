@@ -1,11 +1,14 @@
 import { supabase } from "../config/supabaseClient";
 import type { PostPayload } from "../types/payloads";
 import type { Post } from "../types/Post";
+import type { PostTagJoin } from "../types/PostTagJoin";
+
 export type SortOption = "recent" | "popular" | "discussed";
 
 export type GetPostsParams = {
   sort?: SortOption;
   search?: string;
+  limit?: number;
 };
 export async function createPost(
   { title, content, tags }: PostPayload,
@@ -60,8 +63,9 @@ export async function createPost(
 }
 
 export async function getPosts({
-  //sort = "recent",
+  sort = "recent",
   search = "",
+  limit,
 }: GetPostsParams = {}): Promise<Post[]> {
   let query = supabase
     .from("posts")
@@ -71,7 +75,7 @@ export async function getPosts({
       author:users(
         username,
         avatar_url,
-        user_media(public_url)
+        reputation
       ),
       tags:post_tags(tag:tags(name))
     `,
@@ -82,8 +86,21 @@ export async function getPosts({
     query = query.ilike("title", `%${search.trim()}%`);
   }
 
-  query = query.order("created_at", { ascending: false });
+  if (sort === "recent") {
+    query = query.order("created_at", { ascending: false });
+  }
 
+  if (sort === "popular") {
+    query = query.order("likes_count", { ascending: false });
+  }
+
+  if (sort === "discussed") {
+    query = query.order("comments_count", { ascending: false });
+  }
+
+  if (limit)
+    query = query.limit(limit);
+  
   const { data, error } = await query;
   if (error) throw new Error(error.message);
 
@@ -91,10 +108,10 @@ export async function getPosts({
     ...post,
     author: post.author
       ? {
-          username: post.author.username,
-          avatar_url:
-            post.author.user_media?.public_url ?? post.author.avatar_url,
-        }
+        username: post.author.username,
+        avatar_url: post.author.avatar_url,
+        reputation: post.author.reputation,
+      }
       : null,
     tags: post.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
@@ -111,7 +128,7 @@ export async function getPostById(id: string): Promise<Post> {
       author:users(
         username,
         avatar_url,
-        user_media(public_url)
+        reputation
       ),
       tags:post_tags(tag:tags(name))
     `,
@@ -126,10 +143,10 @@ export async function getPostById(id: string): Promise<Post> {
     ...data,
     author: data.author
       ? {
-          username: data.author.username,
-          avatar_url:
-            data.author.user_media?.public_url ?? data.author.avatar_url,
-        }
+        username: data.author.username,
+        avatar_url: data.author.avatar_url,
+        reputation: data.author.reputation,
+      }
       : null,
     tags: data.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
@@ -221,7 +238,7 @@ export async function getPostsByAuthor(
       author:users(
         username,
         avatar_url,
-        user_media(public_url)
+        reputation
       ),
       tags:post_tags(tag:tags(name))
     `
@@ -238,13 +255,46 @@ export async function getPostsByAuthor(
     ...post,
     author: post.author
       ? {
-          username: post.author.username,
-          avatar_url:
-            post.author.avatar_url,
-        }
+        username: post.author.username,
+        avatar_url: post.author.avatar_url,
+        reputation: post.author.reputation,
+      }
       : null,
     tags: post.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
     })),
   }));
+}
+
+export async function getPostsByTag(tagId: string) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select(`
+      *,
+      author:users(
+        username,
+        avatar_url,
+        reputation
+      ),
+      post_tags!inner(
+        tag:tags(
+          id,
+          name
+        )
+      )
+    `)
+    .eq("post_tags.tag_id", tagId)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  // normalize tags into flat array
+  const normalized: Post[] =
+    data?.map((post) => ({
+      ...post,
+      tags: post.post_tags?.map((pt: PostTagJoin) => pt.tag) ?? [],
+    })) ?? [];
+
+  return normalized;
 }

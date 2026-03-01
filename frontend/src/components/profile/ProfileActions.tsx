@@ -7,11 +7,13 @@ type Props = {
 
 export function ProfileActions({ id }: Props) {
   return (
+    <div className={s.rightSection}>
     <NavLink 
       to={`/profile/${id}/edit`}
       className={s.editButton}
     >
       Edit Profile
-    </NavLink>
+    </NavLink>  
+  </div>
   );
 }

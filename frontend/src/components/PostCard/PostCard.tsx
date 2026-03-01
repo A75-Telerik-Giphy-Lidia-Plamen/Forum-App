@@ -37,6 +37,7 @@ export default function PostCard({
 }: PostCardProps) {
   const authorName = post.author?.username ?? "Unknown";
   const initials = getInitials(authorName);
+  console.log(post)
 
   if (variant === "compact") {
     return (
@@ -83,7 +84,7 @@ export default function PostCard({
         <h3 className={styles.title}>{post.title}</h3>
         <p className={styles.excerpt}>{getPreview(post.content)}</p>
 
-        {post.tags.length > 0 && (
+        {post.tags?.length > 0 && (
           <div className={styles.tagsRow}>
             {post.tags.slice(0, 3).map((tag) => (
               <span key={tag.name} className={styles.tag}>

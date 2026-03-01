@@ -23,7 +23,7 @@ export default function ProfilePosts({ posts, firstname }: Props) {
                     <div className="mb-4 mt-6">
                         <h3 className={`${styles.heading} flex items-center gap-2`}>
                             <BookOpenText className="h-6 w-6 text-orange-500" />
-                            <span className="">Posts by {firstname}</span>
+                            <span className="dark:text-zinc-300">Posts by {firstname}</span>
                         </h3>
                     </div>
                     <div className={styles.postList}>

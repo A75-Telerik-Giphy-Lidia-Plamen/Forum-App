@@ -113,16 +113,20 @@ export async function getPosts({
       }));
   }
 
-  let query = supabase
-    .from("posts")
-    .select(
-      `*, author:users(username, avatar_url, reputation), tags:post_tags(tag:tags(name))`,
-    )
-    .eq("is_deleted", false);
-
-  if (tagName) {
-    query = query.eq("post_tags.tags.name", tagName.toLowerCase());
-  }
+  let query = tagName
+    ? supabase
+        .from("posts")
+        .select(
+          `*, author:users(username, avatar_url, reputation), tags:post_tags!inner(tag:tags!inner(name))`,
+        )
+        .eq("is_deleted", false)
+        .eq("post_tags.tags.name", tagName.toLowerCase())
+    : supabase
+        .from("posts")
+        .select(
+          `*, author:users(username, avatar_url, reputation), tags:post_tags(tag:tags(name))`,
+        )
+        .eq("is_deleted", false);
 
   if (sort === "recent")
     query = query.order("created_at", { ascending: false });

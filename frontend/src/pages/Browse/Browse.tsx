@@ -68,7 +68,7 @@ export default function Browse() {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Search posts, tags, or authors..."
+            placeholder="Search posts by tags or key words"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

@@ -70,31 +70,58 @@ export async function getPosts({
   limit,
   tagName,
 }: GetPostsParams = {}): Promise<Post[]> {
-  const tagsSelect = tagName
-    ? "tags:post_tags!inner(tag:tags!inner(name))"
-    : "tags:post_tags(tag:tags(name))";
+  if (search.trim()) {
+    const titleQueryFinal = supabase
+      .from("posts")
+      .select(
+        `*, author:users(username, avatar_url, reputation), tags:post_tags(tag:tags(name))`,
+      )
+      .eq("is_deleted", false)
+      .ilike("title", `%${search.trim()}%`);
+
+    const tagQueryFinal = supabase
+      .from("posts")
+      .select(
+        `*, author:users(username, avatar_url, reputation), tags:post_tags!inner(tag:tags!inner(name))`,
+      )
+      .eq("is_deleted", false)
+      .eq("post_tags.tags.name", search.trim().toLowerCase());
+
+    const [{ data: byTitle, error: e1 }, { data: byTag, error: e2 }] =
+      await Promise.all([titleQueryFinal, tagQueryFinal]);
+
+    if (e1) throw new Error(e1.message);
+    if (e2) throw new Error(e2.message);
+
+    return [...(byTitle ?? []), ...(byTag ?? [])]
+      .filter(
+        (post, index, self) =>
+          self.findIndex((p) => p.id === post.id) === index,
+      )
+      .map((post) => ({
+        ...post,
+        author: post.author
+          ? {
+              username: post.author.username,
+              avatar_url: post.author.avatar_url,
+              reputation: post.author.reputation,
+            }
+          : null,
+        tags: post.tags.map((t: { tag: { name: string } }) => ({
+          name: t.tag.name,
+        })),
+      }));
+  }
 
   let query = supabase
     .from("posts")
     .select(
-      `
-      *,
-      author:users(
-        username,
-        avatar_url,
-        reputation
-      ),
-      ${tagsSelect}
-    `,
+      `*, author:users(username, avatar_url, reputation), tags:post_tags(tag:tags(name))`,
     )
     .eq("is_deleted", false);
 
   if (tagName) {
     query = query.eq("post_tags.tags.name", tagName.toLowerCase());
-  }
-
-  if (search.trim()) {
-    query = query.ilike("title", `%${search.trim()}%`);
   }
 
   if (sort === "recent")

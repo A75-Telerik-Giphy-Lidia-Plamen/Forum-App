@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
   Clock,
   Heart,
   MessageCircle,
   SlidersHorizontal,
+  X,
+  Tag,
 } from "lucide-react";
 import { getPosts } from "../../services/post.service";
 import PostCard from "../../components/PostCard/PostCard";
@@ -28,18 +30,30 @@ const SORT_ICONS: Record<SortOption, React.ReactNode> = {
 
 export default function Browse() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [search, setSearch] = useState<string>("");
   const [sort, setSort] = useState<SortOption>("recent");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
+  const activeTag = searchParams.get("tag") ?? "";
+
   useEffect(() => {
-    getPosts({ sort, search })
+    getPosts({ sort, search, tagName: activeTag || undefined })
       .then(setPosts)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [sort, search]);
+  }, [sort, search, activeTag]);
+
+  function clearTagFilter() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("tag");
+      return next;
+    });
+  }
 
   return (
     <div className={styles.page}>
@@ -81,6 +95,23 @@ export default function Browse() {
           </button>
         </div>
 
+        {activeTag && (
+          <div className={styles.activeTagRow}>
+            <span className={styles.activeTagChip}>
+              <Tag className={styles.activeTagIcon} />
+              {activeTag}
+              <button
+                type="button"
+                onClick={clearTagFilter}
+                className={styles.activeTagClear}
+                aria-label={`Remove tag filter: ${activeTag}`}
+              >
+                <X size={12} />
+              </button>
+            </span>
+          </div>
+        )}
+
         {error && <p className={styles.errorBox}>{error}</p>}
 
         {loading && <Loading />}
@@ -89,7 +120,9 @@ export default function Browse() {
           <>
             {posts.length === 0 ? (
               <p className={styles.emptyState}>
-                No posts found. Try a different search or filter.
+                {activeTag
+                  ? `No posts found with tag "${activeTag}".`
+                  : "No posts found. Try a different search or filter."}
               </p>
             ) : (
               <div className={styles.postList}>

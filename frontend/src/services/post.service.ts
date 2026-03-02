@@ -9,7 +9,9 @@ export type GetPostsParams = {
   sort?: SortOption;
   search?: string;
   limit?: number;
+  tagName?: string;
 };
+
 export async function createPost(
   { title, content, tags }: PostPayload,
   userId?: string,
@@ -66,7 +68,12 @@ export async function getPosts({
   sort = "recent",
   search = "",
   limit,
+  tagName,
 }: GetPostsParams = {}): Promise<Post[]> {
+  const tagsSelect = tagName
+    ? "tags:post_tags!inner(tag:tags!inner(name))"
+    : "tags:post_tags(tag:tags(name))";
+
   let query = supabase
     .from("posts")
     .select(
@@ -77,30 +84,28 @@ export async function getPosts({
         avatar_url,
         reputation
       ),
-      tags:post_tags(tag:tags(name))
+      ${tagsSelect}
     `,
     )
     .eq("is_deleted", false);
+
+  if (tagName) {
+    query = query.eq("post_tags.tags.name", tagName.toLowerCase());
+  }
 
   if (search.trim()) {
     query = query.ilike("title", `%${search.trim()}%`);
   }
 
-  if (sort === "recent") {
+  if (sort === "recent")
     query = query.order("created_at", { ascending: false });
-  }
-
-  if (sort === "popular") {
+  if (sort === "popular")
     query = query.order("likes_count", { ascending: false });
-  }
-
-  if (sort === "discussed") {
+  if (sort === "discussed")
     query = query.order("comments_count", { ascending: false });
-  }
 
-  if (limit)
-    query = query.limit(limit);
-  
+  if (limit) query = query.limit(limit);
+
   const { data, error } = await query;
   if (error) throw new Error(error.message);
 
@@ -108,10 +113,10 @@ export async function getPosts({
     ...post,
     author: post.author
       ? {
-        username: post.author.username,
-        avatar_url: post.author.avatar_url,
-        reputation: post.author.reputation,
-      }
+          username: post.author.username,
+          avatar_url: post.author.avatar_url,
+          reputation: post.author.reputation,
+        }
       : null,
     tags: post.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
@@ -143,10 +148,10 @@ export async function getPostById(id: string): Promise<Post> {
     ...data,
     author: data.author
       ? {
-        username: data.author.username,
-        avatar_url: data.author.avatar_url,
-        reputation: data.author.reputation,
-      }
+          username: data.author.username,
+          avatar_url: data.author.avatar_url,
+          reputation: data.author.reputation,
+        }
       : null,
     tags: data.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
@@ -227,10 +232,8 @@ export async function deletePost(
   if (error) throw new Error(error.message);
 }
 
-export async function getPostsByAuthor(
-  authorId: string,
-): Promise<Post[]> {
-  let query = supabase
+export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
+  const query = supabase
     .from("posts")
     .select(
       `
@@ -241,12 +244,11 @@ export async function getPostsByAuthor(
         reputation
       ),
       tags:post_tags(tag:tags(name))
-    `
+    `,
     )
     .eq("is_deleted", false)
-    .eq("author_id", authorId);
-
-  query = query.order("created_at", { ascending: false });
+    .eq("author_id", authorId)
+    .order("created_at", { ascending: false });
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
@@ -255,10 +257,10 @@ export async function getPostsByAuthor(
     ...post,
     author: post.author
       ? {
-        username: post.author.username,
-        avatar_url: post.author.avatar_url,
-        reputation: post.author.reputation,
-      }
+          username: post.author.username,
+          avatar_url: post.author.avatar_url,
+          reputation: post.author.reputation,
+        }
       : null,
     tags: post.tags.map((t: { tag: { name: string } }) => ({
       name: t.tag.name,
@@ -269,7 +271,8 @@ export async function getPostsByAuthor(
 export async function getPostsByTag(tagId: string) {
   const { data, error } = await supabase
     .from("posts")
-    .select(`
+    .select(
+      `
       *,
       author:users(
         username,
@@ -282,14 +285,14 @@ export async function getPostsByTag(tagId: string) {
           name
         )
       )
-    `)
+    `,
+    )
     .eq("post_tags.tag_id", tagId)
     .eq("is_deleted", false)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  // normalize tags into flat array
   const normalized: Post[] =
     data?.map((post) => ({
       ...post,

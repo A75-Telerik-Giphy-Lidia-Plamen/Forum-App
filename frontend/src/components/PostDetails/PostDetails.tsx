@@ -75,9 +75,7 @@ export default function PostDetail() {
   }
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   if (error || !post) {
@@ -112,11 +110,11 @@ export default function PostDetail() {
 
         <h1 className={styles.title}>{post.title}</h1>
         <Link to={`/profile/${post.author_id}`}>
-        <AuthorCard
-          username={authorName}
-          avatarUrl={post.author?.avatar_url}
-          reputation={post.author?.reputation}
-        />
+          <AuthorCard
+            username={authorName}
+            avatarUrl={post.author?.avatar_url}
+            reputation={post.author?.reputation}
+          />
         </Link>
 
         <p className={styles.content}>{post.content}</p>
@@ -124,9 +122,14 @@ export default function PostDetail() {
         {post.tags.length > 0 && (
           <div className={styles.tagsRow}>
             {post.tags.map((tag) => (
-              <span key={tag.name} className={styles.tag}>
+              <button
+                key={tag.name}
+                type="button"
+                className={styles.tag}
+                onClick={() => navigate(`/posts?tag=${tag.name}`)}
+              >
                 #{tag.name}
-              </span>
+              </button>
             ))}
           </div>
         )}

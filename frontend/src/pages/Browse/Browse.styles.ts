@@ -79,4 +79,9 @@ export const styles = {
     text-stone-400 text-sm text-center py-12
     dark:text-zinc-500
   `,
+  activeTagRow: "mt-2 mb-1 flex items-center gap-2",
+  activeTagChip:
+    "flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium",
+  activeTagIcon: "w-3 h-3",
+  activeTagClear: "ml-1 hover:text-indigo-900 transition-colors cursor-pointer",
 };

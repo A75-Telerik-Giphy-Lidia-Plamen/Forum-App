@@ -2,8 +2,11 @@ export const headerStyles = {
   wrapper: `
     sticky top-0 z-50
     backdrop-blur-md
-    bg-[#F5F0EB]/80 dark:bg-[#1C1A18]/80
-    border-b border-stone-200 dark:border-zinc-800
+    bg-[#F5F0EB]/80
+    dark:bg-[#0B0B0C]/90
+    border-b
+    border-stone-200
+    dark:border-white/5
   `,
 
   container: `
@@ -14,7 +17,8 @@ export const headerStyles = {
 
   brand: `
     text-xl font-semibold tracking-tight
-    text-stone-900 dark:text-white
+    text-stone-900
+    dark:text-white
   `,
 
   desktopNav: `

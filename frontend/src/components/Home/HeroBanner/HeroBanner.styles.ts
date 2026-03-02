@@ -1,6 +1,7 @@
 export const homeBannerStyles = {
   section: `
-    relative aspect-[16/6] w-full overflow-hidden
+    relative aspect-[4/3] lg:aspect-[16/6]
+    w-full overflow-hidden
   `,
   image: `
     absolute inset-0 h-full w-full object-cover
@@ -9,22 +10,29 @@ export const homeBannerStyles = {
     absolute inset-0 bg-black/40
   `,
   contentWrapper: `
-    relative z-10 flex h-full items-center px-24
+    relative z-10 flex h-full items-center
+    px-4 sm:px-8 lg:px-24
   `,
   container: `
-    max-w-2xl text-white
+    max-w-xl lg:max-w-2xl text-white
   `,
   content: `
-    max-w-2xl text-white
+    max-w-xl lg:max-w-2xl text-white
   `,
   title: `
-    text-5xl font-bold leading-tight
+    text-2xl sm:text-3xl lg:text-5xl
+    font-bold leading-snug lg:leading-tight
   `,
   description: `
-    mt-4 text-lg text-white/90
+    mt-3 lg:mt-4
+    text-sm sm:text-base lg:text-lg
+    text-white/90
   `,
   actions: `
-    mt-6 flex gap-4
+    mt-4 lg:mt-6
+    flex flex-col sm:flex-row
+    items-start
+    gap-3 lg:gap-4
   `,
   primaryButton: `
     rounded-lg bg-white px-6 py-3 font-semibold

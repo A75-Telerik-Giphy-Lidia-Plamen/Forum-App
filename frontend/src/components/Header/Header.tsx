@@ -17,7 +17,7 @@ export default function Header() {
         </div>
 
         {/* Mobile */}
-        <div className={s.mobileTrigger}>
+        <div className={`${s.mobileTrigger} dark: text-white`}>
           <MobileMenu />
         </div>
       </div>

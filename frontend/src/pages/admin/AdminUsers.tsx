@@ -19,22 +19,36 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const [currentEmail, setCurrentEmail] = useState<string | null>(null);
 
   useEffect(() => {
-      async function fetchUsers() {
-        setLoading(true);
-    
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .order("created_at", { ascending: false });
-    
-        if (!error && data) {
-          setUsers(data as AdminUser[]);
-        }
-    
-        setLoading(false);
+    async function getCurrentUser() {
+      const { data } = await supabase.auth.getUser();
+      setCurrentEmail(data.user?.email ?? null);
+    }
+    getCurrentUser();
+  }, []);
+
+  const SUPER_ADMINS = [
+    "plamenmihaylov03@gmail.com",
+    "lidia.shkortova@gmail.com",
+  ];
+
+  useEffect(() => {
+    async function fetchUsers() {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        setUsers(data as AdminUser[]);
       }
+
+      setLoading(false);
+    }
     fetchUsers();
   }, []);
 
@@ -51,6 +65,33 @@ export default function AdminUsers() {
           u.id === user.id
             ? { ...u, is_blocked: !u.is_blocked }
             : u
+        )
+      );
+    }
+  }
+
+  async function toggleRole(user: AdminUser) {
+    if (!currentEmail || !SUPER_ADMINS.includes(currentEmail)) return;
+
+    // Prevent downgrading
+    if (
+      SUPER_ADMINS.includes(user.email) &&
+      user.role === "admin"
+    ) {
+      return;
+    }
+
+    const newRole = user.role === "admin" ? "user" : "admin";
+
+    const { error } = await supabase
+      .from("users")
+      .update({ role: newRole })
+      .eq("id", user.id);
+
+    if (!error) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id ? { ...u, role: newRole } : u
         )
       );
     }
@@ -115,16 +156,24 @@ export default function AdminUsers() {
                     {user.email}
                   </td>
 
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-md text-xs ${
-                        user.role === "admin"
-                          ? "bg-orange-500/10 text-orange-400"
-                          : "bg-zinc-700 text-zinc-300"
-                      }`}
+                  <td
+                    className="px-4 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => toggleRole(user)}
+                      disabled={
+                        !SUPER_ADMINS.includes(currentEmail ?? "") ||
+                        (SUPER_ADMINS.includes(user.email) &&
+                          user.role === "admin")
+                      }
+                      className={`px-2 py-1 rounded-md text-xs transition ${user.role === "admin"
+                        ? "bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
+                        : "bg-zinc-700 text-zinc-300 hover:bg-zinc-600"
+                        } disabled:opacity-40 disabled:cursor-not-allowed`}
                     >
                       {user.role}
-                    </span>
+                    </button>
                   </td>
 
                   <td className="px-4 py-3">
@@ -145,11 +194,10 @@ export default function AdminUsers() {
                   >
                     <button
                       onClick={() => toggleBlock(user)}
-                      className={`cursor-pointer flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium ${
-                        user.is_blocked
-                          ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
-                          : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
-                      }`}
+                      className={`cursor-pointer flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium ${user.is_blocked
+                        ? "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+                        : "bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                        }`}
                     >
                       {user.is_blocked ? (
                         <>

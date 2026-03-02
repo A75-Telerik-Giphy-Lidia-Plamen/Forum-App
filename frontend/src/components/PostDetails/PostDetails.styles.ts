@@ -68,6 +68,8 @@ export const styles = {
     dark:text-zinc-300
   `,
 
+  mediaWrapper: "mb-6",
+
   tagsRow: "flex flex-wrap gap-2 mb-6",
 
   tag: `

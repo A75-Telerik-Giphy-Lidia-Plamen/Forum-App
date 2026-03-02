@@ -15,9 +15,16 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     useComments(postId);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState(error);
   const totalComments = useMemo(() => countComments(comments), [comments]);
 
   async function handleSubmit() {
+
+    if (user?.is_blocked) {
+      setErr("Your account is blocked from commenting.");
+      return;
+    }
+
     if (!content.trim()) return;
     try {
       setSubmitting(true);
@@ -32,7 +39,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     <div className={styles.section}>
       <h2 className={styles.heading}>Comments ({totalComments})</h2>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {err && <p className={styles.error}>{err}</p>}
 
       <div className={styles.commentBox}>
         <textarea

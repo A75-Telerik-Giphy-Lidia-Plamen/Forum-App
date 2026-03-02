@@ -1,7 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, MessageCircle, Clock } from "lucide-react";
 import { styles } from "./PostCard.styles";
 import type { Post } from "../../types/Post";
+import type { Media } from "../../types/Media";
+import { supabase } from "../../config/supabaseClient";
+import PostMediaCarousel from "../PostMediaCarousel/PostMediaCarousel";
 
 type PostCardProps = {
   post: Post;
@@ -37,6 +41,43 @@ export default function PostCard({
 }: PostCardProps) {
   const authorName = post.author?.username ?? "Unknown";
   const initials = getInitials(authorName);
+  const [media, setMedia] = useState<Media[]>([]);
+  const shouldLoadMedia = variant !== "compact";
+
+  useEffect(() => {
+    if (!shouldLoadMedia) return;
+    let isActive = true;
+
+    async function loadMedia() {
+      const { data, error } = await supabase
+        .from("post_media")
+        .select("id, public_url, mime_type, position")
+        .eq("post_id", post.id)
+        .order("position", { ascending: true });
+
+      if (!isActive) return;
+
+      if (error) {
+        console.error(error);
+        setMedia([]);
+        return;
+      }
+
+      const normalized: Media[] = (data ?? []).map((row) => ({
+        id: row.id,
+        url: row.public_url,
+        media_type: row.mime_type?.startsWith("video/") ? "video" : "image",
+        position: row.position,
+      }));
+
+      setMedia(normalized);
+    }
+
+    loadMedia();
+    return () => {
+      isActive = false;
+    };
+  }, [post.id, shouldLoadMedia]);
 
   if (variant === "compact") {
     return (
@@ -81,7 +122,16 @@ export default function PostCard({
         </div>
 
         <h3 className={styles.title}>{post.title}</h3>
-        <p className={styles.excerpt}>{getPreview(post.content)}</p>
+
+        {media.length > 0 && (
+          <div className={styles.mediaWrapper}>
+            <PostMediaCarousel media={media} />
+          </div>
+        )}
+
+        {post.content && (
+          <p className={styles.excerpt}>{getPreview(post.content)}</p>
+        )}
 
         {post.tags?.length > 0 && (
           <div className={styles.tagsRow}>

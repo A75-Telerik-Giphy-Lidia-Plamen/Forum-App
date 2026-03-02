@@ -39,6 +39,8 @@ export const styles = {
     dark:text-zinc-400
   `,
 
+  mediaWrapper: "mb-4",
+
   tagsRow: "flex flex-wrap gap-1.5 mb-3",
 
   tag: `

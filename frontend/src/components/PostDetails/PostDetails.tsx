@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Clock, Pencil, Trash2 } from "lucide-react";
 import { getPostById, deletePost } from "../../services/post.service";
+import { supabase } from "../../config/supabaseClient";
 import { useUser } from "../../hooks/useUser";
 import { styles } from "./PostDetails.styles";
 import type { Post } from "../../types/Post";
+import type { Media } from "../../types/Media";
 import AuthorCard from "../AuthorCard/AuthorCard";
 import Button from "../ui/Button/Button";
 import VoteButtons from "../VoteButtons/VoteButtons";
 import CommentSection from "../CommentSection/CommentSection";
 import Loading from "../ui/Loading";
+import PostMediaCarousel from "../PostMediaCarousel/PostMediaCarousel";
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -25,6 +28,7 @@ export default function PostDetail() {
   const { user } = useUser();
 
   const [post, setPost] = useState<Post | null>(null);
+  const [media, setMedia] = useState<Media[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [deleting, setDeleting] = useState<boolean>(false);
@@ -38,6 +42,41 @@ export default function PostDetail() {
       .then(setPost)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    let isActive = true;
+
+    async function loadMedia() {
+      const { data, error } = await supabase
+        .from("post_media")
+        .select("id, public_url, mime_type, position")
+        .eq("post_id", id)
+        .order("position", { ascending: true });
+
+      if (!isActive) return;
+
+      if (error) {
+        console.error(error);
+        setMedia([]);
+        return;
+      }
+
+      const normalized: Media[] = (data ?? []).map((row) => ({
+        id: row.id,
+        url: row.public_url,
+        media_type: row.mime_type?.startsWith("video/") ? "video" : "image",
+        position: row.position,
+      }));
+
+      setMedia(normalized);
+    }
+
+    loadMedia();
+    return () => {
+      isActive = false;
+    };
   }, [id]);
 
   function handleVote(value: 1 | -1, previousValue: 1 | -1 | null) {
@@ -117,7 +156,13 @@ export default function PostDetail() {
           />
         </Link>
 
-        <p className={styles.content}>{post.content}</p>
+        {media.length > 0 && (
+          <div className={styles.mediaWrapper}>
+            <PostMediaCarousel media={media} />
+          </div>
+        )}
+
+        {post.content && <p className={styles.content}>{post.content}</p>}
 
         {post.tags.length > 0 && (
           <div className={styles.tagsRow}>

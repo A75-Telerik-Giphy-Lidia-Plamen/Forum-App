@@ -25,7 +25,6 @@ export default function AuthorCard({
   reputation = 0,
 }: AuthorCardProps) {
   const initials = getInitials(username);
-  console.log(reputation)
 
   return (
     <div className={styles.card}>

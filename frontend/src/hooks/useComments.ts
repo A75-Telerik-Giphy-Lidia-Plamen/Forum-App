@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useUser } from "./useUser";
 import {
   getCommentsByPost,
   addComment,
   deleteComment,
+  createReply,
 } from "../services/comments.service";
 import type { Comment } from "../types/Comment";
+import { supabase } from "../config/supabaseClient";
 
 interface UseCommentsReturn {
   comments: Comment[];
   isLoading: boolean;
   error: string | null;
   submit: (content: string) => Promise<void>;
+  submitReply: (parentId: string, content: string) => Promise<void>;
   remove: (commentId: string) => Promise<void>;
 }
 
@@ -21,37 +24,69 @@ export function useComments(postId: string): UseCommentsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchComments() {
+  const fetchComments = useCallback(
+    async (showLoading: boolean) => {
       try {
-        setIsLoading(true);
+        if (showLoading) {
+          setIsLoading(true);
+        }
         setError(null);
 
         const data = await getCommentsByPost(postId);
 
-        if (isMounted) {
-          setComments(data);
-        }
+        setComments(data);
       } catch (err: unknown) {
-        if (!isMounted) return;
         setError(
           err instanceof Error ? err.message : "Failed to load comments",
         );
       } finally {
-        if (isMounted) {
+        if (showLoading) {
           setIsLoading(false);
         }
       }
-    }
+    },
+    [postId],
+  );
 
-    fetchComments();
+  useEffect(() => {
+    void fetchComments(true);
+  }, [fetchComments]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`comments:${postId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "comments",
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          void fetchComments(false);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "comments",
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          void fetchComments(false);
+        },
+      )
+      .subscribe((status) => {
+        console.log("Realtime status:", status);
+      });
 
     return () => {
-      isMounted = false;
+      void supabase.removeChannel(channel);
     };
-  }, [postId]);
+  }, [postId, fetchComments]);
 
   const submit = async (content: string) => {
     if (!user?.id) return;
@@ -59,10 +94,21 @@ export function useComments(postId: string): UseCommentsReturn {
     try {
       setError(null);
       await addComment(postId, user.id, { content });
-      const updated = await getCommentsByPost(postId);
-      setComments(updated);
+      await fetchComments(false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to post comment");
+    }
+  };
+
+  const submitReply = async (parentId: string, content: string) => {
+    if (!user?.id) return;
+
+    try {
+      setError(null);
+      await createReply(postId, parentId, user.id, { content });
+      await fetchComments(false);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to post reply");
     }
   };
 
@@ -72,11 +118,11 @@ export function useComments(postId: string): UseCommentsReturn {
     try {
       setError(null);
       await deleteComment(commentId, user.id);
-      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+      await fetchComments(false);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete comment");
     }
   };
 
-  return { comments, isLoading, error, submit, remove };
+  return { comments, isLoading, error, submit, submitReply, remove };
 }

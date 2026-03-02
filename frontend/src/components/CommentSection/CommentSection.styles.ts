@@ -71,8 +71,50 @@ export const styles = {
     dark:text-zinc-300
   `,
 
+  commentActions: "flex items-center gap-3 mt-3",
+
+  replyBtn: `
+    text-xs text-stone-600 hover:text-stone-900 hover:underline
+    dark:text-zinc-400 dark:hover:text-zinc-200
+  `,
+
   deleteBtn: `
-    text-xs text-red-500 mt-2 hover:underline
+    text-xs text-red-500 hover:underline
     dark:text-red-400
+  `,
+
+  replyForm: `
+    mt-3 flex flex-col gap-2
+  `,
+
+  replyTextarea: `
+    w-full border border-stone-200 bg-white rounded p-2 text-sm resize-none min-h-[80px]
+    text-stone-800 placeholder:text-stone-400
+    focus:outline-none focus:ring-2 focus:ring-orange-300
+
+    dark:bg-zinc-900 dark:border-zinc-800
+    dark:text-zinc-200 dark:placeholder:text-zinc-500
+    dark:focus:ring-orange-500/40
+  `,
+
+  replyActions: "flex items-center gap-2",
+
+  replySubmitBtn: `
+    px-3 py-1.5 bg-orange-500 hover:bg-orange-600
+    text-white rounded text-xs transition-colors
+    disabled:opacity-50 disabled:cursor-not-allowed
+
+    dark:bg-orange-500 dark:hover:bg-orange-400
+  `,
+
+  replyCancelBtn: `
+    px-3 py-1.5 border border-stone-200 text-xs rounded
+    text-stone-600 hover:text-stone-900 hover:border-stone-300
+    dark:border-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200
+  `,
+
+  replyList: `
+    mt-4 ml-4 pl-4 space-y-4 border-l border-stone-200
+    dark:border-zinc-800
   `,
 };

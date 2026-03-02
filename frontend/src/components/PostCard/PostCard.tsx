@@ -37,7 +37,6 @@ export default function PostCard({
 }: PostCardProps) {
   const authorName = post.author?.username ?? "Unknown";
   const initials = getInitials(authorName);
-  console.log(post)
 
   if (variant === "compact") {
     return (

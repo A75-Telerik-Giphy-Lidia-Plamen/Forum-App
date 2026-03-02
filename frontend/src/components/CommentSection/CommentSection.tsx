@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useComments } from "../../hooks/useComments";
 import { useUser } from "../../hooks/useUser";
 import { styles } from "./CommentSection.styles";
+import type { Comment } from "../../types/Comment";
+import { countComments } from "../../utils/buildCommentTree";
 
 interface CommentSectionProps {
   postId: string;
@@ -9,9 +11,11 @@ interface CommentSectionProps {
 
 export default function CommentSection({ postId }: CommentSectionProps) {
   const { user } = useUser();
-  const { comments, isLoading, error, submit, remove } = useComments(postId);
+  const { comments, isLoading, error, submit, submitReply, remove } =
+    useComments(postId);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const totalComments = useMemo(() => countComments(comments), [comments]);
 
   async function handleSubmit() {
     if (!content.trim()) return;
@@ -26,7 +30,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
   return (
     <div className={styles.section}>
-      <h2 className={styles.heading}>Comments ({comments.length})</h2>
+      <h2 className={styles.heading}>Comments ({totalComments})</h2>
 
       {error && <p className={styles.error}>{error}</p>}
 
@@ -59,32 +63,132 @@ export default function CommentSection({ postId }: CommentSectionProps) {
             <p className={styles.emptyText}>No comments yet. Be the first!</p>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className={styles.commentItem}>
-                <div className={styles.commentHeader}>
-                  <span className={styles.commentAuthor}>
-                    {comment.author?.username ?? "Unknown"}
-                  </span>
-                  <span className={styles.commentDate}>
-                    {new Date(comment.created_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-                <p className={styles.commentContent}>{comment.content}</p>
-                {user?.id === comment.author_id && (
-                  <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    onClick={() => remove(comment.id)}
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onDelete={remove}
+                onReply={submitReply}
+                currentUserId={user?.id ?? null}
+              />
             ))
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type CommentItemProps = {
+  comment: Comment;
+  currentUserId: string | null;
+  onReply: (parentId: string, content: string) => Promise<void>;
+  onDelete: (commentId: string) => Promise<void>;
+};
+
+function CommentItem({
+  comment,
+  currentUserId,
+  onReply,
+  onDelete,
+}: CommentItemProps) {
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const canReply = Boolean(currentUserId);
+  const canDelete = currentUserId === comment.author_id;
+  const isFrok = comment.author?.username === "frok";
+
+  async function handleReplySubmit() {
+    if (!replyContent.trim()) return;
+    try {
+      setIsSubmitting(true);
+      await onReply(comment.id, replyContent.trim());
+      setReplyContent("");
+      setIsReplying(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className={`
+      ${styles.commentItem}
+      ${isFrok ? "animate-frok-enter border border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20" : ""}
+    `}>
+      <div className={styles.commentHeader}>
+        <span className={styles.commentAuthor}>
+          {comment.author?.username ?? "Unknown"}
+        </span>
+        <span className={styles.commentDate}>
+          {new Date(comment.created_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+      </div>
+      <p className={styles.commentContent}>{comment.content}</p>
+      <div className={styles.commentActions}>
+        {canReply && (
+          <button
+            type="button"
+            className={styles.replyBtn}
+            onClick={() => setIsReplying((prev) => !prev)}
+          >
+            {isReplying ? "Cancel" : "Reply"}
+          </button>
+        )}
+        {canDelete && (
+          <button
+            type="button"
+            className={styles.deleteBtn}
+            onClick={() => onDelete(comment.id)}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+
+      {isReplying && (
+        <div className={styles.replyForm}>
+          <textarea
+            className={styles.replyTextarea}
+            placeholder="Write a reply..."
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+          />
+          <div className={styles.replyActions}>
+            <button
+              type="button"
+              className={styles.replySubmitBtn}
+              onClick={handleReplySubmit}
+              disabled={isSubmitting || !replyContent.trim()}
+            >
+              {isSubmitting ? "Posting..." : "Post Reply"}
+            </button>
+            <button
+              type="button"
+              className={styles.replyCancelBtn}
+              onClick={() => setIsReplying(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {comment.replies.length > 0 && (
+        <div className={styles.replyList}>
+          {comment.replies.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              onDelete={onDelete}
+              onReply={onReply}
+              currentUserId={currentUserId}
+            />
+          ))}
         </div>
       )}
     </div>

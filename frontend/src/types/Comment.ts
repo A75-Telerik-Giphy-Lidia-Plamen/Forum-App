@@ -2,6 +2,7 @@ export type Comment = {
   id: string;
   post_id: string;
   author_id: string;
+  parent_id: string | null;
   content: string;
   is_deleted: boolean;
   created_at: string;
@@ -9,4 +10,5 @@ export type Comment = {
     username: string;
     avatar_url: string | null;
   } | null;
+  replies: Comment[];
 };
